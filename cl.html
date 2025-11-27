@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scientific Calculator</title>
+
+    <!-- Google AdSense -->
+    <script async
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3711692130238293"
+        crossorigin="anonymous"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: start;
+            align-items: center;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .ad-container { width:100%; max-width:420px; margin-bottom:15px; }
+        .ad-slot { display:block; width:100%; min-height:60px; }
+
+        .calculator {
+            background: #2d3436;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+            max-width: 420px;
+            width: 100%;
+        }
+        .display {
+            background: #636e72;
+            color: #fff;
+            font-size: 28px;
+            padding: 20px;
+            text-align: right;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            min-height: 100px;
+            overflow-y: auto;
+            word-wrap: break-word;
+        }
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+        }
+        button {
+            background: #74b9ff;
+            border: none;
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 18px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: .3s;
+        }
+        .operator { background: #fdcb6e; }
+        .function { background: #6c5ce7; color: #fff; }
+        .equals { background: #00b894; color: #fff; grid-column: span 2; }
+        .clear { background: #d63031; color:white; }
+        .zero { grid-column: span 2; }
+
+        h1 { text-align:center; color:white; margin-bottom:20px; }
+
+        .mode-toggle { display:flex; justify-content:center; margin-bottom:25px; gap:15px; }
+        .mode-btn { padding:12px 24px; background:#636e72; color:white; border:none; border-radius:8px; cursor:pointer; }
+        .mode-btn.active { background:#00b894; }
+    </style>
+</head>
+
+<body>
+
+    <!-- إعلان أعلى الصفحة -->
+    <div class="ad-container">
+        <ins class="adsbygoogle ad-slot"
+            data-ad-client="ca-pub-3711692130238293"
+            data-ad-slot="1111111111"
+            data-ad-format="auto"
+            data-full-width-responsive="true"></ins>
+    </div>
+
+    <div class="calculator">
+        <h1>Scientific Calculator</h1>
+
+        <div class="mode-toggle">
+            <button class="mode-btn active" onclick="toggleMode('basic')">Basic</button>
+            <button class="mode-btn" onclick="toggleMode('scientific')">Scientific</button>
+        </div>
+
+        <div id="history" style="color:white; margin-bottom:10px; height:40px; overflow-y:auto;"></div>
+        <div id="display" class="display">0</div>
+
+        <div class="buttons">
+            <button class="clear" onclick="clearDisplay()">C</button>
+            <button class="clear" onclick="clearEntry()">CE</button>
+            <button class="function" onclick="appendToDisplay('(')">(</button>
+            <button class="function" onclick="appendToDisplay(')')">)</button>
+            <button class="operator" onclick="appendToDisplay('/')">÷</button>
+
+            <button class="function" onclick="appendToDisplay('sin(')">sin</button>
+            <button class="function" onclick="appendToDisplay('cos(')">cos</button>
+            <button class="function" onclick="appendToDisplay('tan(')">tan</button>
+            <button class="function" onclick="appendToDisplay('log(')">log</button>
+            <button class="operator" onclick="appendToDisplay('*')">×</button>
+
+            <button class="function" onclick="appendToDisplay('sqrt(')">√</button>
+            <button class="function" onclick="appendToDisplay('pow(')">x^y</button>
+            <button class="function" onclick="appendToDisplay('pi')">π</button>
+            <button class="function" onclick="appendToDisplay('e')">e</button>
+            <button class="operator" onclick="appendToDisplay('-')">-</button>
+
+            <button onclick="appendToDisplay('7')">7</button>
+            <button onclick="appendToDisplay('8')">8</button>
+            <button onclick="appendToDisplay('9')">9</button>
+            <button class="function" onclick="appendToDisplay('%')">%</button>
+            <button class="operator" onclick="appendToDisplay('+')">+</button>
+
+            <button onclick="appendToDisplay('4')">4</button>
+            <button onclick="appendToDisplay('5')">5</button>
+            <button onclick="appendToDisplay('6')">6</button>
+            <button class="function" onclick="appendToDisplay('factorial(')">x!</button>
+            <button class="function" onclick="appendToDisplay('1/')">1/x</button>
+
+            <button onclick="appendToDisplay('1')">1</button>
+            <button onclick="appendToDisplay('2')">2</button>
+            <button onclick="appendToDisplay('3')">3</button>
+            <button class="function" onclick="appendToDisplay('abs(')">|x|</button>
+            <button class="equals" onclick="calculate()">=</button>
+
+            <button class="zero" onclick="appendToDisplay('0')">0</button>
+            <button onclick="appendToDisplay('.')">.</button>
+            <button class="function" onclick="appendToDisplay('exp(')">e^x</button>
+        </div>
+    </div>
+
+    <!-- إعلان أسفل الصفحة -->
+    <div class="ad-container">
+        <ins class="adsbygoogle ad-slot"
+            data-ad-client="ca-pub-3711692130238293"
+            data-ad-slot="2222222222"
+            data-ad-format="auto"
+            data-full-width-responsive="true"></ins>
+    </div>
+
+    <script>
+        let display = document.getElementById("display");
+        let historyBox = document.getElementById("history");
+
+        function appendToDisplay(value) {
+            if (display.textContent === "0") display.textContent = value;
+            else display.textContent += value;
+        }
+
+        function clearDisplay() { display.textContent = "0"; }
+        function clearEntry() {
+            let t = display.textContent;
+            display.textContent = t.length > 1 ? t.slice(0, -1) : "0";
+        }
+
+        function factorial(n) {
+            if (n < 0) return NaN;
+            let r = 1;
+            for (let i = 2; i <= n; i++) r *= i;
+            return r;
+        }
+
+        function calculate() {
+            try {
+                let expr = display.textContent
+                    .replace(/sin/g, "Math.sin")
+                    .replace(/cos/g, "Math.cos")
+                    .replace(/tan/g, "Math.tan")
+                    .replace(/log/g, "Math.log10")
+                    .replace(/sqrt/g, "Math.sqrt")
+                    .replace(/pow/g, "Math.pow")
+                    .replace(/pi/g, "Math.PI")
+                    .replace(/e(?!xp)/g, "Math.E")
+                    .replace(/exp/g, "Math.exp")
+                    .replace(/abs/g, "Math.abs")
+                    .replace(/(\d+)%/g, "($1/100)");
+
+                if (expr.includes("factorial"))
+                    expr = expr.replace(/factorial\((\d+)\)/g, (_, n) => factorial(parseInt(n)));
+
+                let result = eval(expr);
+                historyBox.textContent = display.textContent + " = " + result;
+                display.textContent = result;
+            } catch {
+                display.textContent = "Error";
+                setTimeout(() => display.textContent = "0", 1200);
+            }
+        }
+
+        function toggleMode(mode) {
+            let f = document.querySelectorAll(".function");
+            let mb = document.querySelectorAll(".mode-btn");
+            mb.forEach(b => b.classList.remove("active"));
+            event.target.classList.add("active");
+
+            if (mode === "basic")
+                f.forEach(btn => {
+                    if (btn.textContent.match(/sin|cos|tan|log|√|x\^y|x!|1\/x|\|x\||e\^x/))
+                        btn.style.display = "none";
+                });
+            else f.forEach(btn => btn.style.display = "block");
+        }
+
+        /* ============================
+           نظام الإعلانات — نسخة صحيحة
+           ============================ */
+        window.addEventListener("load", () => {
+            document.querySelectorAll(".adsbygoogle").forEach(el => {
+                try { (adsbygoogle = window.adsbygoogle || []).push({}); }
+                catch (e) { console.warn("Ad error:", e); }
+            });
+        });
+    </script>
+</body>
+</html>
